@@ -14,6 +14,6 @@ void bench_ping(uint32_t id);
 /**
  * Check if there was a switching context.
  */
-void check_change(void);
+int check_change(void);
 
 #endif

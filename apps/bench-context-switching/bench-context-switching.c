@@ -10,7 +10,7 @@
 struct BContext {
   uint32_t previous_id;
   uint32_t new_id;
-  uint16_t current_time;
+  clock_time_t current_time;
 } bench_context;
 
 
@@ -18,19 +18,29 @@ void bench_ping(uint32_t id) {
   // Save the new id
   bench_context.new_id = id;
   // Save the current time
-  bench_context.current_time = RTIMER_NOW(); // Ticks
   // Check for switching context
-  check_change();
+  if (!check_change()) {
+    bench_context.current_time = RTIMER_NOW(); // Ticks
+  }
 }
 
-void check_change(void) {
+int check_change(void) {
   if(bench_context.new_id != bench_context.previous_id) {
+    // Compute the difference
+    clock_time_t previous = bench_context.current_time;
+    clock_time_t current = RTIMER_NOW();
+    clock_time_t result = current - previous;
+
     // Keep the previous id for log
     uint32_t previous_id = bench_context.previous_id;
     // Change previous_id to new_id
     bench_context.previous_id = bench_context.new_id;
-    // Compute the difference
-    clock_time_t result = RTIMER_NOW() - bench_context.current_time;
+
+    bench_context.current_time = RTIMER_NOW(); // Ticks
+
     printf("[BENCH_CONTEXT_SWITCHING] %lu %lu %lu\n", previous_id, bench_context.new_id, result);
+    
+    return 1; // Change occurs
   }
+  return 0; // No change
 }
