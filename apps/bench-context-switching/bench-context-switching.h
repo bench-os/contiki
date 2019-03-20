@@ -2,9 +2,9 @@
 #define __BENCH_CONTEXT_SWITCHING_H__
 
 #include "contiki.h"
+#include "board.h"
 #include "sys/clock.h"
 #include <stdio.h>
-
 
 /**
  * Ping the benchmark.
