@@ -22,7 +22,7 @@ void bench_ping(uint32_t id)
   // Check for switching context
   if (!check_change())
   {
-    bench_context.current_time = RTIMER_NOW(); // Ticks
+    bench_context.current_time = clock_time(); // Ticks
   }
 }
 
@@ -31,8 +31,8 @@ int check_change(void)
   if (bench_context.new_id != bench_context.previous_id)
   {
     // Compute the difference
+    clock_time_t current = clock_time();
     clock_time_t previous = bench_context.current_time;
-    clock_time_t current = RTIMER_NOW();
     clock_time_t result = current - previous;
 
     // Keep the previous id for log
@@ -40,9 +40,9 @@ int check_change(void)
     // Change previous_id to new_id
     bench_context.previous_id = bench_context.new_id;
 
-    bench_context.current_time = RTIMER_NOW(); // Ticks
+    bench_context.current_time = current; // Ticks
 
-    printf("[BENCH_CONTEXT_SWITCHING] %lu %lu %lu\n", previous_id, bench_context.new_id, result);
+    printf("[BENCH_CONTEXT_SWITCHING] %lu %lu %lu %d\n", previous_id, bench_context.new_id, result, CLOCK_SECOND);
 
     return 1; // Change occurs
   }
