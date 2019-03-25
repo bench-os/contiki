@@ -14,6 +14,22 @@ struct BContext
   clock_time_t current_time;
 } bench_context;
 
+void bench_init()
+{
+    GPIO_SOFTWARE_CONTROL(GPIO_PORT_TO_BASE(GPIO_C_NUM), GPIO_PIN_MASK(2));
+    GPIO_SET_OUTPUT(GPIO_PORT_TO_BASE(GPIO_C_NUM), GPIO_PIN_MASK(2));
+}
+
+void bench_on()
+{
+    GPIO_SET_PIN(GPIO_PORT_TO_BASE(GPIO_C_NUM), GPIO_PIN_MASK(2));
+}
+
+void bench_off()
+{
+    GPIO_CLR_PIN(GPIO_PORT_TO_BASE(GPIO_C_NUM), GPIO_PIN_MASK(2));
+}
+
 void bench_ping(uint32_t id)
 {
   // Save the new id
