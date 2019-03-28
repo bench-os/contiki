@@ -18,7 +18,13 @@ void bench_init()
 {
     GPIO_SOFTWARE_CONTROL(GPIO_PORT_TO_BASE(GPIO_C_NUM), GPIO_PIN_MASK(2));
     GPIO_SET_OUTPUT(GPIO_PORT_TO_BASE(GPIO_C_NUM), GPIO_PIN_MASK(2));
+    printf(BENCH_CONTEXT_SWITCHING_FLAG);
 }
+
+int bench_check_data(char* data)
+{
+    return strcmp(BENCH_CONTEXT_SWITCHING_FLAG, data);
+};
 
 void bench_on()
 {
