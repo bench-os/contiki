@@ -14,28 +14,57 @@ struct BContext
   clock_time_t current_time;
 } bench_context;
 
-void bench_init()
+void bench_init(uint32_t size)
 {
+    // Define the bench_context_switching_cache size
+    bench_context_switching_cache_size = size;
+    bench_context_switching_cache_index = 0;
+    // Define the bench_context_switching_cache
+    bench_context_switching_cache = malloc(sizeof(uint32_t) * bench_context_switching_cache_size);
+    // Setup the GPIO
     GPIO_SOFTWARE_CONTROL(GPIO_PORT_TO_BASE(GPIO_C_NUM), GPIO_PIN_MASK(2));
     GPIO_SET_OUTPUT(GPIO_PORT_TO_BASE(GPIO_C_NUM), GPIO_PIN_MASK(2));
-    printf(BENCH_CONTEXT_SWITCHING_FLAG);
+    // Start the benchmark
+    printf("%s Ready\n", BENCH_CONTEXT_SWITCHING_FLAG);
 }
 
 int bench_check_data(char* data)
 {
-    return strcmp(BENCH_CONTEXT_SWITCHING_FLAG, data);
+    int size = strlen(BENCH_CONTEXT_SWITCHING_FLAG) + strlen(" Ready\n") + 1;
+    char str[size];
+    sprintf(str, "%s Ready\n", BENCH_CONTEXT_SWITCHING_FLAG);
+    return strcmp(str, data);
 };
 
-void bench_on()
+void bench_on(uint32_t pid)
 {
+    // Set the GPIO up
     GPIO_SET_PIN(GPIO_PORT_TO_BASE(GPIO_C_NUM), GPIO_PIN_MASK(2));
+
+    // Store in the cache
+    if (bench_context_switching_cache_index < bench_context_switching_cache_size)
+    {
+        bench_context_switching_cache[bench_context_switching_cache_index] = pid;
+    } 
 }
 
 void bench_off()
 {
+    // Flush the bench_context_switching_cache
+    bench_context_switching_cache_index++;
+    if (bench_context_switching_cache_index == bench_context_switching_cache_size) {
+        printf("%s Start %lu\n", BENCH_CONTEXT_SWITCHING_FLAG, bench_context_switching_cache_size);
+        for(int i = 0; i < bench_context_switching_cache_size; i++)
+        {
+            printf("%lu\n", bench_context_switching_cache[i]);
+        }
+        bench_context_switching_cache_index = 0;
+    }
+
     GPIO_CLR_PIN(GPIO_PORT_TO_BASE(GPIO_C_NUM), GPIO_PIN_MASK(2));
 }
 
+// XXX Delete this. Not used anymore.
 void bench_ping(uint32_t id)
 {
   // Save the new id
@@ -64,7 +93,7 @@ int check_change(void)
 
     bench_context.current_time = current; // Ticks
 
-    printf("[BENCH_CONTEXT_SWITCHING] %lu %lu %lu %d\n", previous_id, bench_context.new_id, result, CLOCK_SECOND);
+    printf("%s %lu %lu %lu %d\n", BENCH_CONTEXT_SWITCHING_FLAG, previous_id, bench_context.new_id, result, CLOCK_SECOND);
 
     return 1; // Change occurs
   }
